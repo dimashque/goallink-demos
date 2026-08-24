@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FC Rapide Berlin — Offizielle Website</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0E2A1E;
+    --ink-2:#123425;
+    --chalk:#F6F3EA;
+    --chalk-dim:#E7E1D2;
+    --amber:#F2A93B;
+    --amber-2:#F7C874;
+    --muted:#8FA79A;
+    --line: rgba(246,243,234,0.14);
+    --shadow: 0 20px 60px rgba(0,0,0,0.35);
+    --radius: 14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background: var(--ink);
+    color: var(--chalk);
+    font-family: 'Inter', sans-serif;
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  h1,h2,h3, .display{
+    font-family:'Anton', sans-serif;
+    font-weight:400;
+    letter-spacing:0.5px;
+    text-transform:uppercase;
+    line-height:0.98;
+  }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 32px; }
+  ::selection{ background:var(--amber); color:var(--ink); }
+
+  /* background pitch-line texture */
+  .pitch-texture{
+    position:fixed; inset:0; z-index:0; pointer-events:none; opacity:0.06;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 78px, var(--chalk) 78px, var(--chalk) 79px),
+      repeating-linear-gradient(90deg, transparent, transparent 78px, var(--chalk) 78px, var(--chalk) 79px);
+  }
+
+  /* NAV */
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    padding:20px 0;
+    transition: background 0.3s ease, padding 0.3s ease, box-shadow .3s ease;
+  }
+  header.scrolled{
+    background: rgba(14,42,30,0.92);
+    backdrop-filter: blur(10px);
+    padding:14px 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    border-bottom:1px solid var(--line);
+  }
+  nav{ display:flex; align-items:center; justify-content:space-between; }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .crest{
+    width:40px; height:40px; border-radius:50%;
+    background: conic-gradient(from 180deg, var(--amber), var(--amber-2), var(--amber));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Anton'; color:var(--ink); font-size:15px;
+    box-shadow: inset 0 0 0 3px var(--ink);
+  }
+  .brand-name{ font-family:'Anton'; font-size:19px; letter-spacing:1px; }
+  .brand-name span{ color:var(--amber); }
+  .navlinks{ display:flex; gap:34px; font-size:14px; font-weight:600; letter-spacing:0.3px; }
+  .navlinks a{ opacity:0.8; transition:opacity .2s, color .2s; position:relative; }
+  .navlinks a:hover{ opacity:1; color:var(--amber); }
+  .nav-cta{
+    background:var(--amber); color:var(--ink); padding:10px 20px; border-radius:999px;
+    font-weight:700; font-size:13px; letter-spacing:0.3px;
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .nav-cta:hover{ transform:translateY(-2px); box-shadow:0 8px 20px rgba(242,169,59,0.35); }
+  .navlinks-wrap{ display:flex; align-items:center; gap:38px; }
+
+  /* HERO */
+  .hero{
+    position:relative; z-index:1;
+    min-height:100vh; display:flex; align-items:center;
+    padding:140px 0 80px;
+  }
+  .hero-glow{
+    position:absolute; top:-10%; right:-10%; width:600px; height:600px; z-index:-1;
+    background: radial-gradient(circle, rgba(242,169,59,0.18), transparent 65%);
+    filter:blur(10px);
+  }
+  .eyebrow-row{ display:flex; align-items:center; gap:14px; margin-bottom:22px; }
+  .dot-live{ width:8px; height:8px; border-radius:50%; background:var(--amber); box-shadow:0 0 0 4px rgba(242,169,59,0.18); animation:pulse 2s infinite; }
+  @keyframes pulse{ 0%,100%{ transform:scale(1); opacity:1;} 50%{ transform:scale(1.3); opacity:0.6;} }
+  .eyebrow{ font-family:'JetBrains Mono'; font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--amber); }
+
+  .hero h1{
+    font-size:clamp(48px, 8vw, 104px);
+    max-width:900px;
+  }
+  .hero h1 .stroke{
+    -webkit-text-stroke: 1.5px var(--chalk);
+    color:transparent;
+  }
+  .hero-sub{
+    max-width:520px; margin-top:26px; font-size:17px; color:var(--muted); line-height:1.7;
+  }
+  .hero-actions{ display:flex; gap:16px; margin-top:38px; flex-wrap:wrap; }
+  .btn-primary{
+    background:var(--amber); color:var(--ink); padding:16px 30px; border-radius:999px;
+    font-weight:800; font-size:14px; letter-spacing:0.3px; display:inline-flex; align-items:center; gap:10px;
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 12px 28px rgba(242,169,59,0.3); }
+  .btn-ghost{
+    border:1.5px solid var(--line); padding:16px 30px; border-radius:999px;
+    font-weight:700; font-size:14px; color:var(--chalk);
+    transition: border-color .2s ease, background .2s ease;
+  }
+  .btn-ghost:hover{ border-color:var(--amber); background:rgba(242,169,59,0.06); }
+
+  .hero-stats{ display:flex; gap:48px; margin-top:70px; flex-wrap:wrap; }
+  .hero-stat .num{ font-family:'Anton'; font-size:38px; color:var(--amber); }
+  .hero-stat .label{ font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
+
+  /* TICKER - signature element */
+  .ticker-outer{
+    position:relative; z-index:1;
+    background:var(--ink-2); border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+    overflow:hidden; padding:16px 0;
+  }
+  .ticker-track{ display:flex; gap:0; width:max-content; animation: scrollTicker 32s linear infinite; }
+  .ticker-outer:hover .ticker-track{ animation-play-state: paused; }
+  @keyframes scrollTicker{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+  .ticker-item{
+    display:flex; align-items:center; gap:14px; padding:0 34px; border-right:1px solid var(--line);
+    font-family:'JetBrains Mono'; font-size:13px; white-space:nowrap;
+  }
+  .ticker-tag{ font-size:10px; padding:3px 8px; border-radius:4px; letter-spacing:1px; font-weight:700; }
+  .tag-live{ background:var(--amber); color:var(--ink); }
+  .tag-ft{ background:transparent; border:1px solid var(--line); color:var(--muted); }
+  .tag-next{ background:transparent; border:1px solid rgba(242,169,59,0.4); color:var(--amber); }
+  .ticker-score{ color:var(--amber); font-weight:700; }
+
+  section{ position:relative; z-index:1; padding:120px 0; }
+  .section-head{ display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:56px; flex-wrap:wrap; gap:20px; }
+  .section-eyebrow{ font-family:'JetBrains Mono'; font-size:12px; color:var(--amber); letter-spacing:2px; text-transform:uppercase; margin-bottom:14px; }
+  .section-head h2{ font-size:clamp(32px,4.5vw,52px); max-width:600px; }
+  .section-desc{ max-width:340px; color:var(--muted); font-size:14.5px; line-height:1.7; }
+
+  /* ABOUT */
+  .about-grid{ display:grid; grid-template-columns: 1.1fr 0.9fr; gap:60px; align-items:center; }
+  .about-text p{ color:var(--muted); font-size:16px; line-height:1.85; margin-bottom:18px; }
+  .about-text strong{ color:var(--chalk); }
+  .badge-row{ display:flex; gap:12px; margin-top:28px; flex-wrap:wrap; }
+  .badge{
+    border:1px solid var(--line); border-radius:999px; padding:8px 16px; font-size:12.5px; color:var(--muted);
+    display:flex; align-items:center; gap:8px;
+  }
+  .stat-panel{
+    background:var(--ink-2); border:1px solid var(--line); border-radius:var(--radius);
+    padding:38px; display:grid; grid-template-columns:1fr 1fr; gap:32px;
+  }
+  .stat-panel .stat .num{ font-family:'Anton'; font-size:42px; color:var(--amber); }
+  .stat-panel .stat .label{ font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:0.8px; margin-top:6px; }
+
+  /* TEAM */
+  .team-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
+  .player-card{
+    background:var(--ink-2); border:1px solid var(--line); border-radius:var(--radius);
+    padding:26px 22px; position:relative; overflow:hidden;
+    transition: transform .25s ease, border-color .25s ease;
+  }
+  .player-card:hover{ transform:translateY(-6px); border-color:rgba(242,169,59,0.4); }
+  .player-number{
+    font-family:'Anton'; font-size:64px; color:rgba(246,243,234,0.08); position:absolute; top:6px; right:14px; line-height:1;
+  }
+  .player-pos{ font-family:'JetBrains Mono'; font-size:11px; color:var(--amber); letter-spacing:1.5px; text-transform:uppercase; }
+  .player-name{ font-size:19px; font-weight:700; margin-top:10px; }
+  .player-meta{ font-size:12.5px; color:var(--muted); margin-top:6px; }
+
+  /* FIXTURES */
+  .fixtures-wrap{ display:grid; grid-template-columns:1fr 1fr; gap:60px; }
+  .fixture-list{ display:flex; flex-direction:column; gap:2px; }
+  .fixture-row{
+    display:flex; align-items:center; justify-content:space-between; padding:18px 22px;
+    background:var(--ink-2); border-left:2px solid transparent;
+    transition: border-color .2s ease, background .2s ease;
+  }
+  .fixture-row:hover{ border-left-color:var(--amber); background:#153728; }
+  .fixture-teams{ font-weight:700; font-size:15px; }
+  .fixture-meta{ font-family:'JetBrains Mono'; font-size:12px; color:var(--muted); margin-top:5px; }
+  .fixture-score{ font-family:'Anton'; font-size:22px; color:var(--amber); }
+  .fixture-badge{ font-family:'JetBrains Mono'; font-size:10px; padding:4px 10px; border-radius:4px; border:1px solid var(--line); color:var(--muted); }
+
+  /* NEWS */
+  .news-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+  .news-card{
+    background:var(--ink-2); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
+    transition: transform .25s ease;
+  }
+  .news-card:hover{ transform:translateY(-6px); }
+  .news-media{
+    height:170px; background:
+      linear-gradient(135deg, rgba(242,169,59,0.25), transparent 60%),
+      repeating-linear-gradient(45deg, rgba(246,243,234,0.05) 0 2px, transparent 2px 14px);
+    position:relative;
+  }
+  .news-media .tag{ position:absolute; bottom:14px; left:16px; font-family:'JetBrains Mono'; font-size:10px; background:var(--amber); color:var(--ink); padding:4px 10px; border-radius:4px; font-weight:700; letter-spacing:0.5px; }
+  .news-body{ padding:24px; }
+  .news-date{ font-family:'JetBrains Mono'; font-size:11px; color:var(--muted); letter-spacing:1px; }
+  .news-title{ font-size:18px; font-weight:700; margin-top:10px; line-height:1.35; }
+  .news-excerpt{ font-size:13.5px; color:var(--muted); margin-top:10px; line-height:1.6; }
+
+  /* CTA / CONTACT */
+  .cta-section{
+    background: var(--ink-2); border-radius:24px; margin:0 32px; padding:80px 60px;
+    display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center;
+    border:1px solid var(--line);
+  }
+  .cta-section h2{ font-size:clamp(30px,4vw,44px); }
+  .cta-section p{ color:var(--muted); margin-top:16px; max-width:420px; line-height:1.7; }
+  form{ display:flex; flex-direction:column; gap:14px; }
+  input, textarea{
+    background:var(--ink); border:1px solid var(--line); border-radius:10px; padding:14px 16px;
+    color:var(--chalk); font-family:'Inter'; font-size:14px;
+  }
+  input:focus, textarea:focus{ outline:none; border-color:var(--amber); }
+  textarea{ resize:none; height:90px; }
+  .submit-btn{
+    background:var(--amber); color:var(--ink); border:none; padding:15px; border-radius:10px;
+    font-weight:800; font-size:14px; cursor:pointer; transition:transform .2s ease;
+  }
+  .submit-btn:hover{ transform:translateY(-2px); }
+
+  footer{ padding:60px 0 40px; position:relative; z-index:1; }
+  .footer-grid{ display:flex; justify-content:space-between; align-items:center; padding-top:30px; border-top:1px solid var(--line); flex-wrap:wrap; gap:16px; }
+  .footer-links{ display:flex; gap:26px; font-size:13px; color:var(--muted); }
+  .footer-links a:hover{ color:var(--amber); }
+  .foot-note{ font-size:12.5px; color:var(--muted); }
+
+  @media (max-width: 900px){
+    .navlinks-wrap{ display:none; }
+    .about-grid, .fixtures-wrap{ grid-template-columns:1fr; }
+    .team-grid{ grid-template-columns:repeat(2,1fr); }
+    .news-grid{ grid-template-columns:1fr; }
+    .cta-section{ grid-template-columns:1fr; padding:50px 28px; margin:0 16px; }
+    .hero{ padding-top:120px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ticker-track{ animation:none; }
+    .dot-live{ animation:none; }
+  }
+</style>
+</head>
+<body>
+<div class="pitch-texture"></div>
+
+<header id="siteHeader">
+  <nav class="wrap">
+    <div class="brand">
+      <div class="crest">FRB</div>
+      <div class="brand-name">RAPIDE<span>BERLIN</span></div>
+    </div>
+    <div class="navlinks-wrap">
+      <div class="navlinks">
+        <a href="#verein">Verein</a>
+        <a href="#team">Team</a>
+        <a href="#spielplan">Spielplan</a>
+        <a href="#news">News</a>
+      </div>
+      <a href="#kontakt" class="nav-cta">Mitglied werden</a>
+    </div>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="wrap">
+    <div class="eyebrow-row">
+      <div class="dot-live"></div>
+      <div class="eyebrow">Kreisliga A · Saison 2026/27</div>
+    </div>
+    <h1>Ein Verein.<br><span class="stroke">Eine Elf.</span><br>Kein Stillstand.</h1>
+    <p class="hero-sub">FC Rapide Berlin steht seit 1974 für Amateurfußball mit Anspruch — vom Bambini-Training bis zur ersten Herrenmannschaft. Wedding wird nicht laut. Wedding spielt.</p>
+    <div class="hero-actions">
+      <a href="#spielplan" class="btn-primary">Nächstes Spiel ansehen →</a>
+      <a href="#kontakt" class="btn-ghost">Verein kontaktieren</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num">51</div><div class="label">Vereinsjahre</div></div>
+      <div class="hero-stat"><div class="num">6</div><div class="label">Mannschaften</div></div>
+      <div class="hero-stat"><div class="num">230+</div><div class="label">Mitglieder</div></div>
+      <div class="hero-stat"><div class="num">3</div><div class="label">Kreispokale</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="ticker-outer">
+  <div class="ticker-track" id="tickerTrack"></div>
+</div>
+
+<section id="verein">
+  <div class="wrap about-grid">
+    <div>
+      <div class="section-eyebrow">Der Verein</div>
+      <h2 style="margin-bottom:26px;">Gegründet auf Asphalt,<br>gewachsen auf Rasen.</h2>
+      <div class="about-text">
+        <p><strong>FC Rapide Berlin</strong> wurde 1974 von einer Handvoll Nachbarn im Wedding gegründet, die einen Bolzplatz in einen richtigen Sportverein verwandeln wollten. Heute trainieren bei uns sechs Mannschaften — von der U9 bis zu den Alten Herren — auf unserem eigenen Platz an der Transvaalstraße.</p>
+        <p>Wir stehen für kurze Wege, ehrenamtliches Engagement und Fußball, der allen offensteht — unabhängig von Herkunft oder Geldbeutel. Der Mitgliedsbeitrag ist bewusst niedrig gehalten.</p>
+      </div>
+      <div class="badge-row">
+        <div class="badge">⚽ Eigener Trainingsplatz</div>
+        <div class="badge">🎽 6 Altersklassen</div>
+        <div class="badge">🤝 Ehrenamtlich geführt</div>
+      </div>
+    </div>
+    <div class="stat-panel">
+      <div class="stat"><div class="num">1974</div><div class="label">Gegründet</div></div>
+      <div class="stat"><div class="num">14</div><div class="label">Trainer &amp; Betreuer</div></div>
+      <div class="stat"><div class="num">89%</div><div class="label">Spielbeteiligung Jugend</div></div>
+      <div class="stat"><div class="num">2</div><div class="label">Rasenplätze</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="team">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="section-eyebrow">Kader</div>
+        <h2>Die erste Mannschaft</h2>
+      </div>
+      <div class="section-desc">Ein Auszug aus unserem Kader für die Saison 2026/27 — 24 Spieler, ein Ziel: der Klassenerhalt mit Anspruch auf mehr.</div>
+    </div>
+    <div class="team-grid" id="teamGrid"></div>
+  </div>
+</section>
+
+<section id="spielplan">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="section-eyebrow">Spielplan</div>
+        <h2>Ergebnisse &amp; Termine</h2>
+      </div>
+      <div class="section-desc">Alle Spiele der ersten Mannschaft im Überblick — Heimspiele auf dem Platz an der Transvaalstraße.</div>
+    </div>
+    <div class="fixtures-wrap">
+      <div>
+        <div class="section-eyebrow" style="margin-bottom:18px;">Letzte Ergebnisse</div>
+        <div class="fixture-list" id="resultsList"></div>
+      </div>
+      <div>
+        <div class="section-eyebrow" style="margin-bottom:18px;">Kommende Spiele</div>
+        <div class="fixture-list" id="upcomingList"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="news">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="section-eyebrow">Vereinsnews</div>
+        <h2>Was bei uns läuft</h2>
+      </div>
+    </div>
+    <div class="news-grid">
+      <div class="news-card">
+        <div class="news-media"><div class="tag">Jugend</div></div>
+        <div class="news-body">
+          <div class="news-date">18. AUG 2026</div>
+          <div class="news-title">U15 zieht ins Kreispokal-Halbfinale ein</div>
+          <div class="news-excerpt">Nach einem 3:1 gegen Hertha Zehlendorf II steht unsere U15 erstmals seit vier Jahren wieder im Halbfinale.</div>
+        </div>
+      </div>
+      <div class="news-card">
+        <div class="news-media"><div class="tag">Verein</div></div>
+        <div class="news-body">
+          <div class="news-date">09. AUG 2026</div>
+          <div class="news-title">Neuer Trainingsplan für die Saison steht</div>
+          <div class="news-excerpt">Ab September trainieren alle Mannschaften nach dem neuen, digital abrufbaren Trainingsplan.</div>
+        </div>
+      </div>
+      <div class="news-card">
+        <div class="news-media"><div class="tag">Herren</div></div>
+        <div class="news-body">
+          <div class="news-date">02. AUG 2026</div>
+          <div class="news-title">Vorbereitung abgeschlossen: Das sagt der Trainer</div>
+          <div class="news-excerpt">Fünf Testspiele, drei Siege — Trainer Kowalski zieht vor dem Saisonstart eine positive Bilanz.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="kontakt">
+  <div class="cta-section">
+    <div>
+      <div class="section-eyebrow">Mitmachen</div>
+      <h2>Werde Teil von Rapide Berlin.</h2>
+      <p>Ob als Spieler, Trainer oder Sponsor — wir freuen uns über jede Nachricht. Wir melden uns in der Regel innerhalb von zwei Tagen zurück.</p>
+    </div>
+    <form onsubmit="event.preventDefault(); this.querySelector('.submit-btn').textContent='Danke! Nachricht gesendet ✓';">
+      <input type="text" placeholder="Dein Name" required>
+      <input type="email" placeholder="Deine E-Mail-Adresse" required>
+      <textarea placeholder="Worum geht's? (optional)"></textarea>
+      <button class="submit-btn" type="submit">Nachricht senden</button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="brand">
+        <div class="crest" style="width:32px;height:32px;font-size:12px;">FRB</div>
+        <div class="brand-name" style="font-size:15px;">RAPIDE<span>BERLIN</span></div>
+      </div>
+      <div class="footer-links">
+        <a href="#verein">Verein</a>
+        <a href="#team">Team</a>
+        <a href="#spielplan">Spielplan</a>
+        <a href="#kontakt">Kontakt</a>
+      </div>
+      <div class="foot-note">Demo-Website · gebaut von GoalLink</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // header scroll state
+  const header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // ticker content
+  const tickerItems = [
+    {tag:'live', tagText:'LIVE', text:'Rapide Berlin', score:'2:1', text2:"SG Wedding '10"},
+    {tag:'ft', tagText:'FT', text:'Hertha Zehlendorf II', score:'0:2', text2:'Rapide Berlin'},
+    {tag:'next', tagText:'SA 14:00', text:'Rapide Berlin', score:'—', text2:'TuS Moabit'},
+    {tag:'ft', tagText:'FT', text:'Rapide Berlin', score:'1:1', text2:'BSC Tiergarten'},
+    {tag:'next', tagText:'SO 11:00', text:'BFC Preussen III', score:'—', text2:'Rapide Berlin'},
+  ];
+  function tickerHTML(t){
+    const cls = t.tag === 'live' ? 'tag-live' : (t.tag === 'next' ? 'tag-next' : 'tag-ft');
+    return `<div class="ticker-item"><span class="ticker-tag ${cls}">${t.tagText}</span> ${t.text} <span class="ticker-score">${t.score}</span> ${t.text2}</div>`;
+  }
+  const track = document.getElementById('tickerTrack');
+  track.innerHTML = tickerItems.map(tickerHTML).join('') + tickerItems.map(tickerHTML).join('');
+
+  // team grid
+  const players = [
+    {n:1, name:'Jonas Fiedler', pos:'Torwart', meta:'28 Jahre · seit 2021'},
+    {n:4, name:'Kevin Bartsch', pos:'Innenverteidiger', meta:'Kapitän · seit 2016'},
+    {n:5, name:'Malik Öztürk', pos:'Innenverteidiger', meta:'24 Jahre · seit 2023'},
+    {n:2, name:'Tom Reinicke', pos:'Rechtsverteidiger', meta:'22 Jahre · seit 2024'},
+    {n:3, name:'Elias Grunwald', pos:'Linksverteidiger', meta:'26 Jahre · seit 2020'},
+    {n:6, name:'Ben Sorge', pos:'Defensives Mittelfeld', meta:'25 Jahre · seit 2022'},
+    {n:8, name:'Luca Petri', pos:'Zentrales Mittelfeld', meta:'23 Jahre · seit 2023'},
+    {n:11, name:'Daniyar Suleimenov', pos:'Rechtsaußen', meta:'21 Jahre · seit 2025'},
+  ];
+  document.getElementById('teamGrid').innerHTML = players.map(p => `
+    <div class="player-card">
+      <div class="player-number">${p.n}</div>
+      <div class="player-pos">${p.pos}</div>
+      <div class="player-name">${p.name}</div>
+      <div class="player-meta">${p.meta}</div>
+    </div>
+  `).join('');
+
+  // fixtures
+  const results = [
+    {teams:'Rapide Berlin — Hertha Zehlendorf II', score:'2:0', meta:'Kreisliga A · 10.08.2026'},
+    {teams:'BSC Tiergarten — Rapide Berlin', score:'1:1', meta:'Kreisliga A · 03.08.2026'},
+    {teams:'Rapide Berlin — TuS Moabit', score:'3:2', meta:'Testspiel · 27.07.2026'},
+  ];
+  const upcoming = [
+    {teams:'Rapide Berlin — TuS Moabit', badge:'SA 30.08 · 14:00', meta:'Heimspiel · Transvaalstraße'},
+    {teams:'BFC Preussen III — Rapide Berlin', badge:'SO 07.09 · 11:00', meta:'Auswärts · Preussenstadion'},
+    {teams:'Rapide Berlin — SG Wedding \'10', badge:'SA 13.09 · 14:00', meta:'Heimspiel · Transvaalstraße'},
+  ];
+  document.getElementById('resultsList').innerHTML = results.map(r => `
+    <div class="fixture-row">
+      <div><div class="fixture-teams">${r.teams}</div><div class="fixture-meta">${r.meta}</div></div>
+      <div class="fixture-score">${r.score}</div>
+    </div>`).join('');
+  document.getElementById('upcomingList').innerHTML = upcoming.map(r => `
+    <div class="fixture-row">
+      <div><div class="fixture-teams">${r.teams}</div><div class="fixture-meta">${r.meta}</div></div>
+      <div class="fixture-badge">${r.badge}</div>
+    </div>`).join('');
+</script>
+</body>
+</html>

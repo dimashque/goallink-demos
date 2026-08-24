@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSV Falkenberg — Vereins-Cockpit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#15181A;
+    --panel:#1D2124;
+    --panel-2:#22262A;
+    --line:#2C3134;
+    --text:#EDEFEF;
+    --dim:#8B9195;
+    --claret:#8C2F39;
+    --claret-2:#B4404C;
+    --gold:#D9A441;
+    --green:#4C9A6A;
+    --red:#C1554A;
+    --radius:12px;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; }
+  h1,h2,h3,.display{ font-family:'Anton'; font-weight:400; text-transform:uppercase; letter-spacing:0.4px; line-height:1; }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+
+  .app{ display:grid; grid-template-columns:250px 1fr; min-height:100vh; }
+
+  /* SIDEBAR */
+  .sidebar{
+    background: var(--panel); border-right:1px solid var(--line);
+    padding:26px 18px; display:flex; flex-direction:column;
+    background-image: radial-gradient(circle at 20% 0%, rgba(140,47,57,0.14), transparent 45%);
+  }
+  .club-id{ display:flex; align-items:center; gap:12px; padding:0 6px 26px; border-bottom:1px solid var(--line); margin-bottom:22px; }
+  .crest{
+    width:42px; height:42px; border-radius:9px; background:linear-gradient(155deg, var(--claret), var(--claret-2));
+    display:flex; align-items:center; justify-content:center; font-family:'Anton'; font-size:14px; flex-shrink:0;
+  }
+  .club-name{ font-size:14.5px; font-weight:700; line-height:1.25; }
+  .club-sub{ font-size:11px; color:var(--dim); margin-top:2px; }
+
+  .role-switch{ display:flex; background:var(--bg); border-radius:9px; padding:4px; margin-bottom:24px; border:1px solid var(--line); }
+  .role-btn{ flex:1; text-align:center; padding:9px 0; font-size:12px; font-weight:700; border-radius:6px; cursor:pointer; color:var(--dim); transition:all .2s ease; }
+  .role-btn.active{ background:var(--claret); color:#fff; }
+
+  .nav-group{ font-size:10.5px; text-transform:uppercase; letter-spacing:1.2px; color:var(--dim); padding:0 8px; margin:18px 0 10px; }
+  .navitem{
+    display:flex; align-items:center; gap:12px; padding:11px 12px; border-radius:9px; font-size:14px; font-weight:600;
+    color:var(--dim); cursor:pointer; transition:all .18s ease; margin-bottom:2px;
+  }
+  .navitem .ic{ width:18px; text-align:center; opacity:0.85; }
+  .navitem:hover{ background:var(--panel-2); color:var(--text); }
+  .navitem.active{ background:rgba(140,47,57,0.18); color:var(--text); box-shadow:inset 2px 0 0 var(--claret); }
+
+  .sidebar-foot{ margin-top:auto; padding:14px 12px; border-top:1px solid var(--line); font-size:12px; color:var(--dim); }
+
+  /* MAIN */
+  main{ padding:32px 40px 60px; }
+  .topbar{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:34px; flex-wrap:wrap; gap:14px; }
+  .topbar h1{ font-size:30px; }
+  .topbar .sub{ color:var(--dim); font-size:13.5px; margin-top:8px; }
+  .user-chip{ display:flex; align-items:center; gap:10px; background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:8px 16px 8px 8px; }
+  .avatar{ width:30px; height:30px; border-radius:50%; background:var(--gold); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#1D2124; }
+
+  .view{ display:none; }
+  .view.active{ display:block; animation:fadeIn .25s ease; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
+
+  /* Overview cards */
+  .card-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:34px; }
+  .stat-card{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:22px; }
+  .stat-card .label{ font-size:11.5px; color:var(--dim); text-transform:uppercase; letter-spacing:0.6px; }
+  .stat-card .value{ font-family:'Anton'; font-size:34px; margin-top:10px; }
+  .stat-card .value.claret{ color:var(--claret-2); }
+  .stat-card .value.gold{ color:var(--gold); }
+  .stat-card .value.green{ color:var(--green); }
+  .stat-card .delta{ font-size:11.5px; color:var(--green); margin-top:6px; }
+
+  .panel{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:26px; margin-bottom:24px; }
+  .panel-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+  .panel-head h3{ font-size:15px; text-transform:none; font-family:'Inter'; font-weight:700; }
+  .panel-head .link{ font-size:12.5px; color:var(--claret-2); font-weight:600; cursor:pointer; }
+
+  .week-row{ display:flex; gap:10px; overflow-x:auto; }
+  .week-day{ flex:1; min-width:120px; background:var(--panel-2); border-radius:9px; padding:14px; border:1px solid var(--line); }
+  .week-day .d{ font-size:11px; color:var(--dim); text-transform:uppercase; letter-spacing:0.5px; }
+  .week-day .n{ font-family:'Anton'; font-size:22px; margin:6px 0; }
+  .week-day .ev{ font-size:11.5px; color:var(--gold); }
+  .week-day.today{ border-color:var(--claret); background:rgba(140,47,57,0.12); }
+
+  /* Kader / roster */
+  .filter-row{ display:flex; gap:10px; margin-bottom:22px; }
+  .chip{ padding:8px 16px; border-radius:999px; border:1px solid var(--line); font-size:12.5px; font-weight:600; color:var(--dim); cursor:pointer; }
+  .chip.active{ background:var(--claret); border-color:var(--claret); color:#fff; }
+  .roster-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+  .roster-card{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:20px; position:relative; overflow:hidden; }
+  .roster-num{ font-family:'Anton'; font-size:50px; color:rgba(255,255,255,0.06); position:absolute; top:0; right:12px; }
+  .roster-name{ font-weight:700; font-size:15px; }
+  .roster-pos{ font-size:11.5px; color:var(--dim); margin-top:3px; }
+  .status-tag{ display:inline-flex; align-items:center; gap:6px; font-size:10.5px; margin-top:14px; padding:4px 10px; border-radius:999px; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; }
+  .status-fit{ background:rgba(76,154,106,0.16); color:var(--green); }
+  .status-injured{ background:rgba(193,85,74,0.16); color:var(--red); }
+  .status-away{ background:rgba(217,164,65,0.16); color:var(--gold); }
+
+  /* Training */
+  .training-list{ display:flex; flex-direction:column; gap:10px; }
+  .training-item{ display:flex; align-items:center; gap:18px; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:16px 18px; cursor:pointer; transition:border-color .2s; }
+  .training-item:hover{ border-color:var(--claret); }
+  .t-date{ font-family:'Anton'; font-size:20px; width:70px; text-align:center; color:var(--gold); }
+  .t-info{ flex:1; }
+  .t-title{ font-weight:700; font-size:14.5px; }
+  .t-meta{ font-size:12px; color:var(--dim); margin-top:3px; }
+  .t-count{ font-size:12px; color:var(--dim); font-family:'JetBrains Mono'; }
+
+  /* Attendance */
+  .attend-select{ margin-bottom:20px; }
+  .attend-select select{ background:var(--panel-2); border:1px solid var(--line); color:var(--text); padding:11px 16px; border-radius:9px; font-size:13.5px; width:100%; max-width:420px; }
+  .attend-list{ display:flex; flex-direction:column; gap:2px; }
+  .attend-row{ display:flex; align-items:center; justify-content:space-between; padding:14px 18px; background:var(--panel-2); border-radius:8px; margin-bottom:6px; }
+  .attend-name{ font-weight:600; font-size:14px; display:flex; align-items:center; gap:12px; }
+  .mini-num{ font-family:'JetBrains Mono'; font-size:11px; color:var(--dim); width:22px; }
+  .toggle{
+    width:46px; height:26px; background:#3a3f42; border-radius:999px; position:relative; cursor:pointer; transition:background .2s;
+  }
+  .toggle.on{ background:var(--green); }
+  .toggle .knob{ position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; transition:left .2s; }
+  .toggle.on .knob{ left:23px; }
+  .attend-summary{ display:flex; align-items:center; gap:16px; margin-top:20px; padding-top:20px; border-top:1px solid var(--line); }
+  .attend-bar{ flex:1; height:8px; background:var(--panel-2); border-radius:99px; overflow:hidden; }
+  .attend-bar-fill{ height:100%; background:var(--green); transition:width .3s ease; }
+  .attend-pct{ font-family:'Anton'; font-size:20px; color:var(--green); min-width:60px; text-align:right; }
+
+  /* player simplified view */
+  .player-view-banner{ background:linear-gradient(135deg, rgba(140,47,57,0.25), rgba(217,164,65,0.08)); border:1px solid var(--line); border-radius:var(--radius); padding:22px 26px; margin-bottom:24px; }
+  .player-view-banner .t{ font-size:15px; font-weight:700; }
+  .player-view-banner .s{ font-size:13px; color:var(--dim); margin-top:4px; }
+
+  @media (max-width:1000px){
+    .app{ grid-template-columns:1fr; }
+    .sidebar{ display:none; }
+    .card-grid, .roster-grid{ grid-template-columns:repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="club-id">
+      <div class="crest">TSV</div>
+      <div>
+        <div class="club-name">TSV Falkenberg</div>
+        <div class="club-sub">Herren I · Saison 26/27</div>
+      </div>
+    </div>
+
+    <div class="role-switch">
+      <div class="role-btn active" id="roleCoach" onclick="setRole('coach')">Trainer</div>
+      <div class="role-btn" id="rolePlayer" onclick="setRole('player')">Spieler</div>
+    </div>
+
+    <div class="nav-group">Cockpit</div>
+    <div class="navitem active" data-view="overview" onclick="setView('overview')"><span class="ic">▦</span> Übersicht</div>
+    <div class="navitem" data-view="roster" onclick="setView('roster')"><span class="ic">☰</span> Kader</div>
+    <div class="navitem" data-view="training" onclick="setView('training')"><span class="ic">◷</span> Training</div>
+    <div class="navitem coach-only" data-view="attendance" onclick="setView('attendance')"><span class="ic">✓</span> Anwesenheit</div>
+
+    <div class="nav-group">Verein</div>
+    <div class="navitem"><span class="ic">⚙</span> Einstellungen</div>
+
+    <div class="sidebar-foot">Zuletzt synchronisiert: <span class="mono">vor 2 Min.</span></div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div>
+        <h1 id="pageTitle">Übersicht</h1>
+        <div class="sub" id="pageSub">Willkommen zurück — hier ist der Stand vor dem nächsten Spieltag.</div>
+      </div>
+      <div class="user-chip">
+        <div class="avatar" id="userAvatar">MK</div>
+        <div>
+          <div style="font-size:13px; font-weight:700;" id="userName">Michael Kowalski</div>
+          <div style="font-size:11px; color:var(--dim);" id="userRole">Trainer, Herren I</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OVERVIEW -->
+    <section class="view active" id="view-overview">
+      <div class="card-grid">
+        <div class="stat-card"><div class="label">Nächstes Training</div><div class="value gold">Mi · 18:30</div><div class="delta">Rasenplatz 2</div></div>
+        <div class="stat-card"><div class="label">Anwesenheitsquote</div><div class="value green">87%</div><div class="delta">↑ 4% ggü. Vorwoche</div></div>
+        <div class="stat-card"><div class="label">Kadergröße</div><div class="value">24</div><div class="delta" style="color:var(--dim);">3 aktuell verletzt</div></div>
+        <div class="stat-card"><div class="label">Nächstes Spiel</div><div class="value claret">SA 14:00</div><div class="delta" style="color:var(--dim);">gegen SV Buchholz</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>Diese Woche</h3><div class="link" onclick="setView('training')">Alle Termine →</div></div>
+        <div class="week-row">
+          <div class="week-day"><div class="d">Mo</div><div class="n">24</div><div class="ev">—</div></div>
+          <div class="week-day today"><div class="d">Di</div><div class="n">25</div><div class="ev">Training</div></div>
+          <div class="week-day"><div class="d">Mi</div><div class="n">26</div><div class="ev">Training</div></div>
+          <div class="week-day"><div class="d">Do</div><div class="n">27</div><div class="ev">—</div></div>
+          <div class="week-day"><div class="d">Fr</div><div class="n">28</div><div class="ev">Videoanalyse</div></div>
+          <div class="week-day"><div class="d">Sa</div><div class="n">29</div><div class="ev">Spieltag</div></div>
+          <div class="week-day"><div class="d">So</div><div class="n">30</div><div class="ev">—</div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>Zuletzt gemeldet</h3></div>
+        <div style="font-size:13.5px; color:var(--dim); line-height:2;">
+          <div>🟡 <strong style="color:var(--text);">Malik Öztürk</strong> hat sich für Mi. Training abgemeldet — beruflich verhindert</div>
+          <div>🩹 <strong style="color:var(--text);">Tom Reinicke</strong> Status auf „verletzt" gesetzt — Rückkehr voraussichtlich 08.09.</div>
+          <div>✅ <strong style="color:var(--text);">Neuer Trainingsplan</strong> für September wurde veröffentlicht</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ROSTER -->
+    <section class="view" id="view-roster">
+      <div class="filter-row">
+        <div class="chip active" onclick="filterRoster(this,'all')">Alle (24)</div>
+        <div class="chip" onclick="filterRoster(this,'fit')">Einsatzbereit</div>
+        <div class="chip" onclick="filterRoster(this,'injured')">Verletzt</div>
+        <div class="chip" onclick="filterRoster(this,'away')">Abwesend</div>
+      </div>
+      <div class="roster-grid" id="rosterGrid"></div>
+    </section>
+
+    <!-- TRAINING -->
+    <section class="view" id="view-training">
+      <div class="panel">
+        <div class="panel-head"><h3>Kommende Termine</h3></div>
+        <div class="training-list" id="trainingList"></div>
+      </div>
+    </section>
+
+    <!-- ATTENDANCE (coach only) -->
+    <section class="view" id="view-attendance">
+      <div class="attend-select">
+        <select id="sessionSelect" onchange="renderAttendance()">
+          <option>Training — Mi. 26.08. · 18:30 · Rasenplatz 2</option>
+          <option>Training — Di. 25.08. · 19:00 · Rasenplatz 1</option>
+          <option>Spiel — Sa. 29.08. · 14:00 · gegen SV Buchholz</option>
+        </select>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Anwesenheit erfassen</h3></div>
+        <div class="attend-list" id="attendList"></div>
+        <div class="attend-summary">
+          <div class="attend-bar"><div class="attend-bar-fill" id="attendBarFill"></div></div>
+          <div class="attend-pct" id="attendPct">—</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+  const players = [
+    {n:1, name:'Jonas Fiedler', pos:'Torwart', status:'fit'},
+    {n:4, name:'Kevin Bartsch', pos:'Innenverteidiger', status:'fit'},
+    {n:5, name:'Malik Öztürk', pos:'Innenverteidiger', status:'away'},
+    {n:2, name:'Tom Reinicke', pos:'Rechtsverteidiger', status:'injured'},
+    {n:3, name:'Elias Grunwald', pos:'Linksverteidiger', status:'fit'},
+    {n:6, name:'Ben Sorge', pos:'Def. Mittelfeld', status:'fit'},
+    {n:8, name:'Luca Petri', pos:'Zentr. Mittelfeld', status:'fit'},
+    {n:11, name:'Daniyar Suleimenov', pos:'Rechtsaußen', status:'fit'},
+    {n:7, name:'Finn Albrecht', pos:'Linksaußen', status:'fit'},
+    {n:9, name:'Rico Wendt', pos:'Mittelstürmer', status:'injured'},
+    {n:10, name:'Aaron Lindqvist', pos:'Offensives Mittelfeld', status:'fit'},
+    {n:14, name:'Sami Karim', pos:'Innenverteidiger', status:'away'},
+  ];
+
+  function renderRoster(filter='all'){
+    const list = filter==='all' ? players : players.filter(p=>p.status===filter);
+    document.getElementById('rosterGrid').innerHTML = list.map(p => `
+      <div class="roster-card">
+        <div class="roster-num">${p.n}</div>
+        <div class="roster-name">${p.name}</div>
+        <div class="roster-pos">${p.pos}</div>
+        <div class="status-tag status-${p.status}">${p.status==='fit'?'Einsatzbereit':p.status==='injured'?'Verletzt':'Abwesend'}</div>
+      </div>`).join('');
+  }
+  function filterRoster(el, f){
+    document.querySelectorAll('.filter-row .chip').forEach(c=>c.classList.remove('active'));
+    el.classList.add('active');
+    renderRoster(f);
+  }
+  renderRoster();
+
+  const trainings = [
+    {d:'25', m:'AUG', title:'Mannschaftstraining', meta:'Dienstag · 19:00–20:30 · Rasenplatz 1', count:'22/24'},
+    {d:'26', m:'AUG', title:'Mannschaftstraining', meta:'Mittwoch · 18:30–20:00 · Rasenplatz 2', count:'—'},
+    {d:'28', m:'AUG', title:'Videoanalyse', meta:'Freitag · 19:00 · Vereinsheim', count:'—'},
+    {d:'29', m:'AUG', title:'Ligaspiel vs. SV Buchholz', meta:'Samstag · 14:00 · Heimspiel', count:'—'},
+    {d:'02', m:'SEP', title:'Mannschaftstraining', meta:'Dienstag · 19:00–20:30 · Rasenplatz 1', count:'—'},
+  ];
+  document.getElementById('trainingList').innerHTML = trainings.map(t => `
+    <div class="training-item" onclick="setView('attendance')">
+      <div class="t-date">${t.d}<div style="font-size:9px; font-family:'JetBrains Mono'; color:var(--dim); letter-spacing:1px;">${t.m}</div></div>
+      <div class="t-info"><div class="t-title">${t.title}</div><div class="t-meta">${t.meta}</div></div>
+      <div class="t-count">${t.count}</div>
+    </div>`).join('');
+
+  function renderAttendance(){
+    document.getElementById('attendList').innerHTML = players.map((p,i) => `
+      <div class="attend-row">
+        <div class="attend-name"><span class="mini-num">${p.n}</span> ${p.name}</div>
+        <div class="toggle ${p.status!=='injured' && i%4!==3 ? 'on':''}" onclick="toggleAttend(this)"><div class="knob"></div></div>
+      </div>`).join('');
+    updateAttendSummary();
+  }
+  function toggleAttend(el){ el.classList.toggle('on'); updateAttendSummary(); }
+  function updateAttendSummary(){
+    const all = document.querySelectorAll('#attendList .toggle');
+    const on = document.querySelectorAll('#attendList .toggle.on').length;
+    const pct = Math.round((on/all.length)*100);
+    document.getElementById('attendBarFill').style.width = pct+'%';
+    document.getElementById('attendPct').textContent = pct+'%';
+  }
+  renderAttendance();
+
+  function setView(v){
+    document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+    document.getElementById('view-'+v).classList.add('active');
+    document.querySelectorAll('.navitem').forEach(el=>el.classList.remove('active'));
+    const item = document.querySelector(`.navitem[data-view="${v}"]`);
+    if(item) item.classList.add('active');
+    const titles = {overview:['Übersicht','Willkommen zurück — hier ist der Stand vor dem nächsten Spieltag.'],
+      roster:['Kader','24 Spieler · Herren I · Saison 26/27'],
+      training:['Training','Alle Termine der kommenden Wochen'],
+      attendance:['Anwesenheit','Anwesenheit für die ausgewählte Einheit erfassen']};
+    document.getElementById('pageTitle').textContent = titles[v][0];
+    document.getElementById('pageSub').textContent = titles[v][1];
+  }
+
+  function setRole(role){
+    document.getElementById('roleCoach').classList.toggle('active', role==='coach');
+    document.getElementById('rolePlayer').classList.toggle('active', role==='player');
+    document.querySelectorAll('.coach-only').forEach(el => el.style.display = role==='coach' ? 'flex' : 'none');
+    if(role==='player'){
+      document.getElementById('userAvatar').textContent='EG';
+      document.getElementById('userName').textContent='Elias Grunwald';
+      document.getElementById('userRole').textContent='Spieler, Linksverteidiger';
+      if(document.getElementById('view-attendance').classList.contains('active')) setView('overview');
+    } else {
+      document.getElementById('userAvatar').textContent='MK';
+      document.getElementById('userName').textContent='Michael Kowalski';
+      document.getElementById('userRole').textContent='Trainer, Herren I';
+    }
+  }
+</script>
+</body>
+</html>
